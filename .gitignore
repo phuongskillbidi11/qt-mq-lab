@@ -1,0 +1,11 @@
+build/
+build-*/
+spike/
+
+# Visual Studio local artefacts. CMakeSettings.json is auto-generated as x64 with
+# no toolset pin, which cannot build this project: Qt 5.15.2 here is x86, and MSVC
+# 14.51 removed stdext, which Qt 5.15's qlist.h still needs. A correct
+# CMakePresets.json is still to be written.
+.vs/
+CMakeSettings.json
+out/

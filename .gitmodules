@@ -1,0 +1,6 @@
+[submodule "external/base"]
+	path = external/base
+	url = https://github.com/phuongskillbidi11/qt-app-base.git
+[submodule "external/AMQP-CPP"]
+	path = external/AMQP-CPP
+	url = https://github.com/CopernicaMarketingSoftware/AMQP-CPP.git

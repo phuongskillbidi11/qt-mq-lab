@@ -8,6 +8,8 @@
 #include <QCheckBox>
 #include <QHeaderView>
 #include <QHBoxLayout>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
@@ -77,7 +79,7 @@ MqTab::MqTab(MqConnection *connection,
     table_->setColumnCount(5);
     table_->setHorizontalHeaderLabels({"#",
                                        utf16(u"L\u00FAc nh\u1EADn"),
-                                       utf16(u"N\u1ED9i dung"),
+                                       "type / payload",
                                        "redelivered",
                                        "ack"});
     UiStyle::tuneTable(table_);
@@ -119,9 +121,10 @@ MqTab::MqTab(MqConnection *connection,
         updateCounters();
     });
     connect(service_, &MqService::messageReceived, this,
-            [this](const QString &, const QDateTime &, const QString &body,
+            [this](const QString &, const QDateTime &, const QString &type,
+                   const QJsonObject &payload,
                    bool redelivered, quint64 deliveryTag) {
-                appendMessage(body, redelivered, deliveryTag);
+                appendMessage(type, payload, redelivered, deliveryTag);
             });
     connect(service_, &MqService::errorOccurred, this, &MqTab::setConnectionError);
     // Deliberately NOT setConnectionError: a discarded message is not a connection fault (F4b).
@@ -180,7 +183,10 @@ void MqTab::sendCurrentBody() {
     }
 }
 
-void MqTab::appendMessage(const QString &body, bool redelivered, quint64 deliveryTag) {
+void MqTab::appendMessage(const QString &type,
+                          const QJsonObject &payload,
+                          bool redelivered,
+                          quint64 deliveryTag) {
     if (table_->rowCount() >= kMaximumRows) {
         table_->removeRow(0);
     }
@@ -195,7 +201,9 @@ void MqTab::appendMessage(const QString &body, bool redelivered, quint64 deliver
     auto *receivedItem = new QTableWidgetItem(QDateTime::currentDateTime().toString("HH:mm:ss"));
     receivedItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     table_->setItem(row, 1, receivedItem);
-    table_->setItem(row, 2, new QTableWidgetItem(body));
+    const QString payloadText = QString::fromUtf8(
+        QJsonDocument(payload).toJson(QJsonDocument::Compact));
+    table_->setItem(row, 2, new QTableWidgetItem(type + "  " + payloadText));
 
     auto *redeliveredItem = new QTableWidgetItem(redelivered ? utf16(u"c\u00F3") : QString());
     redeliveredItem->setTextAlignment(Qt::AlignCenter);

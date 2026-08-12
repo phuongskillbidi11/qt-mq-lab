@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QDateTime>
+#include <QJsonObject>
 #include <QSet>
 #include <QString>
 
@@ -32,7 +33,8 @@ signals:
     void published(QString id);
     void messageReceived(QString id,
                          QDateTime timestamp,
-                         QString body,
+                         QString type,
+                         QJsonObject payload,
                          bool redelivered,
                          quint64 deliveryTag);
     void errorOccurred(QString message);

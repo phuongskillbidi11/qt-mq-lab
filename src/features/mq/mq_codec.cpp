@@ -10,7 +10,9 @@ QByteArray MqCodec::encode(const QString &body) {
         {"id", QUuid::createUuid().toString(QUuid::WithoutBraces)},
         {"ts", QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs)},
         {"v", 1},
-        {"body", body},
+        {"src", "qt-mq-lab"},
+        {"type", "lab.note"},
+        {"payload", QJsonObject{{"text", body}}},
     };
     return QJsonDocument(envelope).toJson(QJsonDocument::Compact);
 }
@@ -26,10 +28,13 @@ MqCodec::DecodeResult MqCodec::decode(const QByteArray &data) {
     const QJsonValue idValue = object.value("id");
     const QJsonValue timestampValue = object.value("ts");
     const QJsonValue versionValue = object.value("v");
-    const QJsonValue bodyValue = object.value("body");
+    const QJsonValue sourceValue = object.value("src");
+    const QJsonValue typeValue = object.value("type");
+    const QJsonValue payloadValue = object.value("payload");
     if (!idValue.isString() || idValue.toString().isEmpty()
         || !timestampValue.isString() || !versionValue.isDouble()
-        || versionValue.toDouble() != 1.0 || !bodyValue.isString()) {
+        || versionValue.toDouble() != 1.0 || !sourceValue.isString()
+        || !typeValue.isString() || !payloadValue.isObject()) {
         return {};
     }
 
@@ -43,7 +48,9 @@ MqCodec::DecodeResult MqCodec::decode(const QByteArray &data) {
     result.envelope.id = idValue.toString();
     result.envelope.timestamp = timestamp;
     result.envelope.version = 1;
-    result.envelope.body = bodyValue.toString();
+    result.envelope.source = sourceValue.toString();
+    result.envelope.type = typeValue.toString();
+    result.envelope.payload = payloadValue.toObject();
     result.valid = true;
     return result;
 }

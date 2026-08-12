@@ -6,6 +6,7 @@
 #include <QWidget>
 
 class QCheckBox;
+class QJsonObject;
 class QLabel;
 class QLineEdit;
 class QPushButton;
@@ -28,7 +29,10 @@ public:
 private:
     void refreshConnectionState();
     void sendCurrentBody();
-    void appendMessage(const QString &body, bool redelivered, quint64 deliveryTag);
+    void appendMessage(const QString &type,
+                       const QJsonObject &payload,
+                       bool redelivered,
+                       quint64 deliveryTag);
     // Non-fatal: one message was discarded. Must not touch the connection state.
     void noteRejectedMessage(const QString &reason);
     void updateCounters();

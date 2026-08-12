@@ -8,9 +8,9 @@
 #include <limits>
 
 namespace {
-constexpr char kExchange[] = "mqlab.direct";
-constexpr char kQueue[] = "mqlab.messages";
-constexpr char kRoutingKey[] = "mqlab.msg";
+constexpr char kExchange[] = "hsf.card";
+constexpr char kQueue[] = "hsf.card.issued";
+constexpr char kRoutingKey[] = "card.issued";
 }
 
 MqService::MqService(MqConnection *connection, QObject *parent)
@@ -93,7 +93,8 @@ bool MqService::startConsuming() {
             pendingDeliveries_.insert(tag);
             emit messageReceived(decoded.envelope.id,
                                  decoded.envelope.timestamp,
-                                 decoded.envelope.body,
+                                 decoded.envelope.type,
+                                 decoded.envelope.payload,
                                  redelivered,
                                  tag);
         });

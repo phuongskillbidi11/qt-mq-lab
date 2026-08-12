@@ -22,8 +22,10 @@ int main() {
     const MqCodec::DecodeResult first = MqCodec::decode(firstData);
     const MqCodec::DecodeResult second = MqCodec::decode(secondData);
 
-    check(first.valid && first.envelope.body == body,
-          "encode then decode preserves the body");
+    check(first.valid && first.envelope.source == "qt-mq-lab"
+              && first.envelope.type == "lab.note"
+              && first.envelope.payload.value("text").toString() == body,
+          "encode then decode preserves the typed note envelope");
     check(first.valid && second.valid && !first.envelope.id.isEmpty()
               && !second.envelope.id.isEmpty() && first.envelope.id != second.envelope.id,
           "encode creates a non-empty unique id");
@@ -34,6 +36,12 @@ int main() {
           "decode rejects an empty id");
     check(!MqCodec::decode("{not valid json").valid,
           "decode rejects malformed JSON without crashing");
+
+    QJsonObject oldBodyEnvelope = QJsonDocument::fromJson(firstData).object();
+    oldBodyEnvelope.remove("payload");
+    oldBodyEnvelope.insert("body", body);
+    check(!MqCodec::decode(QJsonDocument(oldBodyEnvelope).toJson(QJsonDocument::Compact)).valid,
+          "decode rejects the old body shape without payload");
 
     const QDateTime now = QDateTime::currentDateTimeUtc();
     check(first.valid && first.envelope.timestamp.timeSpec() == Qt::UTC

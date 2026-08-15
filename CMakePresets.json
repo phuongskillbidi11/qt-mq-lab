@@ -1,0 +1,36 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "x86-debug",
+      "displayName": "x86 Debug — Qt 5.15.2, MSVC 14.44",
+      "description": "The only configuration this project builds in, and every value here was paid for. x86: the Qt 5.15.2 installed on this machine is 32-bit, so an x64 build links against nothing and dies at LNK4272. Toolset 14.44: MSVC 14.51 removed the stdext namespace that Qt 5.15's qlist.h still uses. Ninja, never the Visual Studio generator: its CL task copies the environment into a case-insensitive hashtable and fails with MSB6001 on the PATH/Path pair. See .plans tasks.md, section Conventions.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "architecture": { "value": "x86", "strategy": "external" },
+      "toolset": { "value": "version=14.44", "strategy": "external" },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_PREFIX_PATH": "C:/Qt/5.15.2/msvc2019",
+        "CMAKE_POLICY_VERSION_MINIMUM": "3.5",
+        "CMAKE_MAKE_PROGRAM": "C:/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "x86-debug",
+      "displayName": "Build x86 Debug",
+      "configurePreset": "x86-debug"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "x86-debug",
+      "displayName": "Test x86 Debug",
+      "configurePreset": "x86-debug",
+      "output": { "outputOnFailure": true }
+    }
+  ]
+}

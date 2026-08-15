@@ -21,7 +21,6 @@ public:
     explicit MqService(MqConnection *connection, QObject *parent = nullptr);
     ~MqService() override;
 
-    bool declareTopology();
     bool publish(const QString &body);
 
 public slots:
@@ -40,6 +39,7 @@ signals:
     void errorOccurred(QString message);
     // One message was discarded. The connection and channel are unaffected.
     void messageRejected(QString reason);
+    void messageReturned(QString routingKey, QString description);
 
 private:
     bool ensureChannel();

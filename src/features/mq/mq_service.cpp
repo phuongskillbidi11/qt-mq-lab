@@ -10,7 +10,6 @@
 namespace {
 constexpr char kExchange[] = "hsf.card";
 constexpr char kQueue[] = "hsf.card.issued";
-constexpr char kRoutingKey[] = "card.issued";
 }
 
 MqService::MqService(MqConnection *connection, QObject *parent)
@@ -18,18 +17,6 @@ MqService::MqService(MqConnection *connection, QObject *parent)
       connection_(connection) {}
 
 MqService::~MqService() = default;
-
-bool MqService::declareTopology() {
-    if (!ensureChannel()) {
-        return false;
-    }
-
-    // Step 3 removes self-declaration when shared infrastructure owns the topology.
-    channel_->declareExchange(kExchange, AMQP::direct, AMQP::durable);
-    channel_->declareQueue(kQueue, AMQP::durable);
-    channel_->bindQueue(kExchange, kQueue, kRoutingKey);
-    return true;
-}
 
 bool MqService::publish(const QString &body) {
     if (!ensureChannel()) {
@@ -45,7 +32,8 @@ bool MqService::publish(const QString &body) {
 
     AMQP::Envelope envelope(payload.constData(), static_cast<uint64_t>(payload.size()));
     envelope.setDeliveryMode(2);
-    if (!channel_->publish(kExchange, kRoutingKey, envelope)) {
+    if (!channel_->publish(kExchange, decoded.envelope.type.toStdString(), envelope,
+                           AMQP::mandatory)) {
         emit errorOccurred("Could not publish the message");
         return false;
     }
@@ -195,5 +183,10 @@ bool MqService::ensureChannel() {
     channel_->onError([this](const char *message) {
         emit errorOccurred(QString::fromUtf8(message));
     });
+    channel_->recall().onReturned(
+        [this](const AMQP::Message &message, int16_t, const std::string &description) {
+            emit messageReturned(QString::fromStdString(message.routingkey()),
+                                 QString::fromStdString(description));
+        });
     return true;
 }

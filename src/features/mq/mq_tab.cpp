@@ -52,7 +52,8 @@ MqTab::MqTab(MqConnection *connection,
       sentValue_(makeCounterValue(this)),
       receivedValue_(makeCounterValue(this)),
       waitingValue_(makeCounterValue(this)),
-      rejectedValue_(makeCounterValue(this)) {
+      rejectedValue_(makeCounterValue(this)),
+      returnedValue_(makeCounterValue(this)) {
     setWindowTitle("Qt MQ Lab");
     resize(920, 580);
 
@@ -105,6 +106,9 @@ MqTab::MqTab(MqConnection *connection,
     footer->addSpacing(16);
     footer->addWidget(new QLabel(utf16(u"B\u1ECF qua:"), this));
     footer->addWidget(rejectedValue_);
+    footer->addSpacing(16);
+    footer->addWidget(new QLabel(utf16(u"Tr\u1EA3 v\u1EC1:"), this));
+    footer->addWidget(returnedValue_);
     mainLayout->addLayout(footer);
 
     connect(settingsButton, &QPushButton::clicked, this, [this]() {
@@ -129,6 +133,7 @@ MqTab::MqTab(MqConnection *connection,
     connect(service_, &MqService::errorOccurred, this, &MqTab::setConnectionError);
     // Deliberately NOT setConnectionError: a discarded message is not a connection fault (F4b).
     connect(service_, &MqService::messageRejected, this, &MqTab::noteRejectedMessage);
+    connect(service_, &MqService::messageReturned, this, &MqTab::noteReturnedMessage);
 
     connectionPoll_.setInterval(250);
     connect(&connectionPoll_, &QTimer::timeout, this, &MqTab::refreshConnectionState);
@@ -168,7 +173,7 @@ void MqTab::refreshConnectionState() {
 
     setConnectionState(utf16(u"\u25CF \u0110\u00E3 k\u1EBFt n\u1ED1i"), "on");
     sendButton_->setEnabled(true);
-    if (!serviceStarted_ && service_->declareTopology() && service_->startConsuming()) {
+    if (!serviceStarted_ && service_->startConsuming()) {
         serviceStarted_ = true;
     }
 }
@@ -231,11 +236,19 @@ void MqTab::noteRejectedMessage(const QString &reason) {
     AppLog::warn(QString("rejected an undecodable message: %1").arg(reason));
 }
 
+void MqTab::noteReturnedMessage(const QString &routingKey, const QString &description) {
+    ++returnedCount_;
+    updateCounters();
+    AppLog::warn(QString("message returned for routing key %1: %2")
+                     .arg(routingKey, description));
+}
+
 void MqTab::updateCounters() {
     sentValue_->setText(QString::number(sentCount_));
     receivedValue_->setText(QString::number(receivedCount_));
     waitingValue_->setText(QString::number(waitingCount_));
     rejectedValue_->setText(QString::number(rejectedCount_));
+    returnedValue_->setText(QString::number(returnedCount_));
 }
 
 void MqTab::setConnectionState(const QString &text, const char *state) {

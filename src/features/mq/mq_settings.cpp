@@ -29,7 +29,7 @@ QString MqSettings::user() const {
 }
 
 QString MqSettings::password() const {
-    return value(kPasswordKey, "devpass").toString();
+    return value(kPasswordKey, QString()).toString();
 }
 
 bool MqSettings::isLocalBroker() const {

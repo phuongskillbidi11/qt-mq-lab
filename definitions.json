@@ -1,0 +1,5 @@
+{
+  "exchange": { "name": "hsf.card", "type": "direct", "durable": true },
+  "queue":    { "name": "hsf.card.issued", "durable": true },
+  "bindings": ["card.issued", "card.cancelled", "card.replaced", "lab.note"]
+}

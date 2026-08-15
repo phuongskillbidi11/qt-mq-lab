@@ -35,6 +35,7 @@ private:
                        quint64 deliveryTag);
     // Non-fatal: one message was discarded. Must not touch the connection state.
     void noteRejectedMessage(const QString &reason);
+    void noteReturnedMessage(const QString &routingKey, const QString &description);
     void updateCounters();
     void setConnectionState(const QString &text, const char *state);
 
@@ -49,6 +50,7 @@ private:
     QLabel *receivedValue_;
     QLabel *waitingValue_;
     QLabel *rejectedValue_;
+    QLabel *returnedValue_;
     QTimer connectionPoll_;
     QString serviceError_;
     quint64 nextSequence_ = 1;
@@ -56,5 +58,6 @@ private:
     quint64 receivedCount_ = 0;
     quint64 waitingCount_ = 0;
     quint64 rejectedCount_ = 0;
+    quint64 returnedCount_ = 0;
     bool serviceStarted_ = false;
 };

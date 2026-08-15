@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
     MqService service(&connection);
     MqTab window(&connection,
                  &service,
+                 &settings,
                  settings.host(),
                  settings.port(),
                  settings.vhost());

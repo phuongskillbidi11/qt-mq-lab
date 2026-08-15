@@ -20,7 +20,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-add_feature_module(mq UI LINK amqpcpp)
+use_base_feature(mq UI LINK amqpcpp)
 
 add_executable(qtmqlab WIN32 app/main.cpp)
 target_link_libraries(qtmqlab PRIVATE feature_mq)

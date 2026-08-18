@@ -1,7 +1,9 @@
 #include "app_log.h"
+#include "card_view.h"
 #include "mq_connection.h"
 #include "mq_service.h"
 #include "mq_settings.h"
+#include "mq_store.h"
 #include "mq_tab.h"
 #include "single_instance.h"
 #include "thememanager.h"
@@ -41,9 +43,20 @@ int main(int argc, char *argv[]) {
     MqSettings settings;
     MqConnection connection;
     MqService service(&connection);
+    MqStore store;
+    const MessagePresenter presenter = [](const QString &type, const QJsonObject &payload) {
+        const CardView::Presented presented = CardView::present(type, payload);
+        QString detail;
+        if (!presented.cardUid.isEmpty() || !presented.gender.isEmpty()) {
+            detail = QString("%1  \xC2\xB7  %2").arg(presented.cardUid, presented.gender);
+        }
+        return PresentedMessage{presented.displayTitle, presented.searchText, detail};
+    };
     MqTab window(&connection,
                  &service,
                  &settings,
+                 &store,
+                 presenter,
                  settings.host(),
                  settings.port(),
                  settings.vhost());

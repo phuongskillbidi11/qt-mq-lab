@@ -21,9 +21,10 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 use_base_feature(mq UI LINK amqpcpp)
+add_feature_module(card_display)
 
 add_executable(qtmqlab WIN32 app/main.cpp)
-target_link_libraries(qtmqlab PRIVATE feature_mq)
+target_link_libraries(qtmqlab PRIVATE feature_mq feature_card_display)
 
 # Without this, a fresh configure produces a tree that builds with exit 0 and then dies at
 # 0xc0000135 (STATUS_DLL_NOT_FOUND) the moment anything runs — including ctest and F5 in Visual
